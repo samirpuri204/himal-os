@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Himal OS Layout
+Comment=Switch between macOS-style and Windows-style desktop layouts
+Exec=himal-layout-switch
+Icon=himal-logo
+Terminal=true
+Categories=Settings;DesktopSettings;

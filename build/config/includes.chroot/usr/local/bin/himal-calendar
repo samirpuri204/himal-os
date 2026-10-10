@@ -1,0 +1,27 @@
+#!/bin/sh
+# himal-calendar - the date, in Nepali as well as English.
+# Build by Samir Puri
+set -u
+dow=$(date +%w)
+mon=$(date +%m)
+
+case "$dow" in
+    0) ne_dow="आइतबार" ;;
+    1) ne_dow="सोमबार" ;;
+    2) ne_dow="मंगलबार" ;;
+    3) ne_dow="बुधबार" ;;
+    4) ne_dow="बिहीबार" ;;
+    5) ne_dow="शुक्रबार" ;;
+    6) ne_dow="शनिबार" ;;
+esac
+
+case "$mon" in
+    01) ne_mon="जनवरी" ;; 02) ne_mon="फेब्रुअरी" ;; 03) ne_mon="मार्च" ;;
+    04) ne_mon="अप्रिल" ;; 05) ne_mon="मे" ;; 06) ne_mon="जुन" ;;
+    07) ne_mon="जुलाई" ;; 08) ne_mon="अगस्ट" ;; 09) ne_mon="सेप्टेम्बर" ;;
+    10) ne_mon="अक्टोबर" ;; 11) ne_mon="नोभेम्बर" ;; 12) ne_mon="डिसेम्बर" ;;
+esac
+
+printf '  %s\n' "$(date '+%A, %d %B %Y')"
+printf '  %s %s %s\n' "$ne_dow" "$(date +%d)" "$ne_mon"
+printf '  %s\n' "$(date '+%H:%M %Z')"

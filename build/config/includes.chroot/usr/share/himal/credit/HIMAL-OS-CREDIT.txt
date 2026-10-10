@@ -1,0 +1,20 @@
+
+   _   _ _                 _      ___  ____
+  | | | (_)_ __ ___   __ _| |    / _ \/ ___|
+  | |_| | | '_ ` _ \ / _` | |   | | | \___ \
+  |  _  | | | | | | | (_| | |   | |_| |___) |
+  |_| |_|_|_| |_| |_|\__,_|_|    \___/|____/
+
+  Himal OS 13   -   arm64   -   Debian-based
+
+  Power by People, Inspired by Nepal
+
+  Built, branded and maintained by
+        Samir Puri
+
+  This file is part of Himal OS and is protected against removal.
+  Delete it and it will be restored automatically.
+
+  Contact the developer: Samir Puri
+  Project: Himal OS
+

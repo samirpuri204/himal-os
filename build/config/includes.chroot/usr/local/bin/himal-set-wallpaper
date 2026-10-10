@@ -1,0 +1,18 @@
+#!/bin/sh
+# Apply the Himal OS wallpaper to whatever displays actually exist.
+WALL=/usr/share/backgrounds/himal/himal-wallpaper-2560x1440.png
+
+set_prop() { # set_prop <property> <type> <value>
+    xfconf-query -c xfce4-desktop -p "$1" -n -t "$2" -s "$3" 2>/dev/null || \
+    xfconf-query -c xfce4-desktop -p "$1"    -t "$2" -s "$3" 2>/dev/null
+}
+
+outs=$(xrandr --listmonitors 2>/dev/null | awk 'NR>1 {print $NF}')
+[ -z "$outs" ] && outs="monitor0"
+
+for out in $outs monitor0; do
+    base="/backdrop/screen0/$out/workspace0"
+    set_prop "$base/last-image"  string "$WALL"
+    set_prop "$base/image-style" int    5
+done
+exit 0

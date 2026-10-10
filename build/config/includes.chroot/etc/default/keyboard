@@ -1,0 +1,6 @@
+# Himal OS - Nepali and English layouts, switch with Super+Space
+XKBMODEL="pc105"
+XKBLAYOUT="us,np"
+XKBVARIANT=","
+XKBOPTIONS="grp:win_space_toggle"
+BACKSPACE="guess"

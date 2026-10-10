@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Himal OS Features
+Comment=What makes this system different
+Exec=xfce4-terminal -e 'sh -c "himal features; exec sh"'
+Icon=himal-logo
+Terminal=false
+Categories=System;Settings;

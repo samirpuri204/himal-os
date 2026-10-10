@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Himal Control Center
+Comment=Quick settings: network, sound, appearance and power
+Exec=himal-control-center
+Icon=preferences-system
+Terminal=false
+Categories=System;Settings;X-Himal;
+Keywords=himal;control-center;

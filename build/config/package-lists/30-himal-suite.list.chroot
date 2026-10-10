@@ -1,0 +1,25 @@
+# Himal OS applications and the libraries they need
+# Developed by Samir Puri
+
+# --- GUI toolkit for the Himal tools ---
+python3-gi
+python3-gi-cairo
+gir1.2-gtk-3.0
+gir1.2-notify-0.7
+
+# --- dynamic desktop ---
+picom
+rofi
+plank
+
+# --- control center / power ---
+power-profiles-daemon
+brightnessctl
+pavucontrol
+gammastep
+blueman
+
+# --- Nepal-first ---
+fonts-noto-core
+fonts-lohit-deva
+locales

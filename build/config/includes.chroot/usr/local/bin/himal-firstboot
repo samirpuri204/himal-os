@@ -1,0 +1,13 @@
+#!/bin/sh
+# Apply Himal OS safe defaults once. Build by Samir Puri
+FLAG=$HOME/.config/himal/firstboot
+[ -f "$FLAG" ] && exit 0
+mkdir -p "$(dirname "$FLAG")" 2>/dev/null
+
+# firewall on, deny incoming by default (already encoded in /etc/ufw/user.rules)
+if command -v ufw >/dev/null 2>&1; then
+    pkexec ufw --force enable >/dev/null 2>&1 || true
+fi
+
+touch "$FLAG"
+exit 0

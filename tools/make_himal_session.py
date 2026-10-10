@@ -1,0 +1,108 @@
+#!/usr/bin/env python3
+"""Himal OS session defaults.
+
+Why this exists: the first build shipped its appearance as /etc/xdg/xfconf
+defaults, and on Debian those lost to the live user's own config and to
+desktop-base's XDG profile. The result was Debian's wallpaper and right-side
+window buttons despite our config being "correct".
+
+xfconf-query writes USER-level settings, which always take precedence, so the
+appearance is applied at session start instead of hoped for through defaults.
+
+Credit: Build by Samir Puri
+"""
+import os
+import pathlib
+
+ROOT = pathlib.Path("config/includes.chroot")
+FILES = {}
+
+SESSION_DEFAULTS = r'''#!/bin/sh
+# himal-session-defaults - apply the Himal OS appearance at login.
+# Build by Samir Puri
+set -u
+
+WALL=/usr/share/backgrounds/himal/himal-wallpaper-2560x1440.png
+
+setp() { # setp <channel> <property> <type> <value>
+    xfconf-query -c "$1" -p "$2" -n -t "$3" -s "$4" 2>/dev/null || \
+    xfconf-query -c "$1" -p "$2"    -t "$3" -s "$4" 2>/dev/null
+}
+
+# wait for the desktop and panel to exist before touching their settings
+i=0
+while [ "$i" -lt 20 ]; do
+    if pgrep -x xfdesktop >/dev/null 2>&1 && pgrep -x xfce4-panel >/dev/null 2>&1; then
+        break
+    fi
+    sleep 1
+    i=$((i + 1))
+done
+sleep 2
+
+# ---- appearance ----
+setp xsettings /Net/ThemeName     string Arc-Darker
+setp xsettings /Net/IconThemeName string Papirus-Dark
+setp xsettings /Gtk/FontName      string "Noto Sans 10"
+
+# ---- window controls on the LEFT (the macOS convention) ----
+setp xfwm4 /general/button_layout string "O|SHMC"
+setp xfwm4 /general/theme         string Arc-Darker
+setp xfwm4 /general/title_font    string "Noto Sans Bold 10"
+
+# ---- wallpaper: every screen, monitor and workspace we can enumerate ----
+outs="monitor0"
+if command -v xrandr >/dev/null 2>&1; then
+    for o in $(xrandr --listmonitors 2>/dev/null | awk 'NR>1 {print $NF}'); do
+        outs="$outs monitor$o"
+    done
+fi
+
+for scr in screen0 screen1; do
+    for out in $outs; do
+        setp xfce4-desktop "/backdrop/$scr/$out/workspace0/last-image"  string "$WALL"
+        setp xfce4-desktop "/backdrop/$scr/$out/workspace0/image-style" int    5
+    done
+done
+
+# have xfdesktop pick up the new backdrop without a full restart
+xfdesktop --reload 2>/dev/null || true
+
+# ---- desktop icons: show the home folder so the credit icon is visible ----
+setp xfce4-desktop /desktop-icons/file-icons/show-home bool true
+setp xfce4-desktop /desktop-icons/style int 2
+
+exit 0
+'''
+
+AUTOSTART = """\
+[Desktop Entry]
+Type=Application
+Name=Himal OS Session Defaults
+Comment=Apply the Himal OS appearance and layout at login
+Exec=/usr/local/bin/himal-session-defaults
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Delay=3
+"""
+
+
+def main():
+    for rel, content, mode in (
+        ("usr/local/bin/himal-session-defaults", SESSION_DEFAULTS, 0o755),
+        ("etc/xdg/autostart/himal-session-defaults.desktop", AUTOSTART, 0o644),
+    ):
+        p = ROOT / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(content, encoding="utf-8")
+        os.chmod(p, mode)
+        print(f"  {p}")
+
+    import subprocess
+    subprocess.run(["sh", "-n", str(ROOT / "usr/local/bin/himal-session-defaults")], check=True)
+    print("  sh -n: OK")
+
+
+if __name__ == "__main__":
+    main()

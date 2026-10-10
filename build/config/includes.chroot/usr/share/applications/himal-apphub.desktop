@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Himal Universal App Hub
+Comment=APT, Flatpak and AppImage in one place
+Exec=himal-apphub
+Icon=system-software-install
+Terminal=false
+Categories=System;Settings;X-Himal;
+Keywords=himal;apphub;

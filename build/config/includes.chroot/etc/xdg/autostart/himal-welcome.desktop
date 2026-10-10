@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Welcome to Himal OS
+Comment=Shown once, on first login
+Exec=/usr/local/bin/himal-welcome
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true

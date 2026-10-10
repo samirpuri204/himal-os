@@ -1,0 +1,168 @@
+#!/usr/bin/env python3
+"""Himal System Dashboard — Build by Samir Puri"""
+import os
+import sys
+sys.path.insert(0, "/usr/local/lib")
+from himal import ui
+
+PREV = {}
+
+
+def build():
+    w, box = ui.win("Himal System Dashboard", width=660, height=600)
+
+    def cpu_pct():
+        try:
+            with open("/proc/stat") as f:
+                parts = [float(x) for x in f.readline().split()[1:]]
+        except Exception:
+            return 0.0
+        idle, total = parts[3] + parts[4], sum(parts)
+        p = PREV.get("cpu")
+        PREV["cpu"] = (idle, total)
+        if not p:
+            return 0.0
+        di, dt = idle - p[0], total - p[1]
+        return 0.0 if dt <= 0 else max(0.0, min(100.0, 100.0 * (1 - di / dt)))
+
+    def mem():
+        info = {}
+        try:
+            for line in open("/proc/meminfo"):
+                k, v = line.split(":", 1)
+                info[k] = float(v.strip().split()[0])
+        except Exception:
+            pass
+        total = info.get("MemTotal", 1) / 1048576.0
+        avail = info.get("MemAvailable", 0) / 1048576.0
+        return max(0.0, total - avail), total
+
+    def disk():
+        try:
+            st = os.statvfs("/")
+            used = (st.f_blocks - st.f_bfree) * st.f_frsize
+            tot = st.f_blocks * st.f_frsize
+            return used / 1073741824.0, tot / 1073741824.0
+        except Exception:
+            return 0.0, 1.0
+
+    def net():
+        rx = tx = 0
+        try:
+            for n in os.listdir("/sys/class/net"):
+                if n == "lo":
+                    continue
+                rx += int(open("/sys/class/net/%s/statistics/rx_bytes" % n).read())
+                tx += int(open("/sys/class/net/%s/statistics/tx_bytes" % n).read())
+        except Exception:
+            pass
+        p = PREV.get("net")
+        PREV["net"] = (rx, tx)
+        if not p:
+            return 0.0, 0.0
+        return (rx - p[0]) / 131072.0, (tx - p[1]) / 131072.0   # Mbit/s, per 1s tick
+
+    # Overview
+    ov = ui.Gtk.Box(orientation=ui.Gtk.Orientation.HORIZONTAL, spacing=10)
+    cards = {}
+    for key, title in (("cpu", "CPU"), ("ram", "RAM"), ("disk", "Disk")):
+        c, g = ui.card(title)
+        val = ui.Gtk.Label(label="—", xalign=0)
+        val.get_style_context().add_class("big-value")
+        g.pack_start(val, False, False, 0)
+        bar = ui.Gtk.LevelBar()
+        bar.set_min_value(0); bar.set_max_value(100)
+        g.pack_start(bar, False, False, 0)
+        cards[key] = (val, bar)
+        ov.pack_start(c, True, True, 0)
+
+    cn, gn = ui.card("Network", "Live throughput")
+    dval = ui.Gtk.Label(label="—", xalign=0)
+    dval.get_style_context().add_class("big-value")
+    gn.pack_start(dval, False, False, 0)
+    cn2, gn2 = ui.card("System Information")
+    info_lbl = ui.Gtk.Label(label="loading...", xalign=0)
+    gn2.pack_start(info_lbl, False, False, 0)
+
+    def tick():
+        p = cpu_pct(); mu, mt = mem(); du, dt = disk(); rx, tx = net()
+        cards["cpu"][0].set_text("%.0f%%" % p); cards["cpu"][1].set_value(p)
+        cards["ram"][0].set_text("%.1f / %.1f GB" % (mu, mt))
+        cards["ram"][1].set_value(100.0 * mu / max(mt, 0.001))
+        cards["disk"][0].set_text("%.1f / %.1f GB" % (du, dt))
+        cards["disk"][1].set_value(100.0 * du / max(dt, 0.001))
+        dval.set_text("down %.1f Mbit/s    up %.1f Mbit/s" % (rx, tx))
+        return True
+
+    overview = ui.Gtk.Box(orientation=ui.Gtk.Orientation.VERTICAL, spacing=10)
+    overview.pack_start(ov, False, False, 0)
+    overview.pack_start(cn, False, False, 0)
+    overview.pack_start(cn2, False, False, 0)
+    overview.pack_start(ui.credit_line(), False, False, 0)
+
+    # System info tab
+    sysb = ui.Gtk.Box(orientation=ui.Gtk.Orientation.VERTICAL, spacing=10)
+    cs, gs = ui.card("System Information")
+    for label, cmd in [("Operating System", "grep -m1 PRETTY_NAME /etc/os-release | cut -d= -f2 | tr -d '\\\"'"),
+                       ("Kernel", "uname -r"),
+                       ("Architecture", "uname -m"),
+                       ("Hostname", "cat /etc/hostname"),
+                       ("Desktop", "xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image 2>/dev/null | sed 's#.*/##'"),
+                       ("Uptime", "uptime -p | sed 's/up //'"),
+                       ("Processor", "grep -m1 'model name' /proc/cpuinfo | cut -d: -f2 | sed 's/^ //'"),
+                       ("Memory", "grep MemTotal /proc/meminfo | awk '{printf \\\"%.0f GB\\\", $2/1048576}'")]:
+        gs.pack_start(ui.row(label, ui.Gtk.Label(label=ui.sh(cmd) or "—", xalign=1)), False, False, 0)
+    sysb.pack_start(cs, False, False, 0)
+
+    # Storage
+    stb = ui.Gtk.Box(orientation=ui.Gtk.Orientation.VERTICAL, spacing=10)
+    cd, gd = ui.card("Storage")
+    for line in (ui.sh("df -h -x tmpfs -x devtmpfs -x squashfs 2>/dev/null") or "").splitlines()[1:]:
+        parts = line.split()
+        if len(parts) >= 6:
+            gd.pack_start(ui.row(parts[5], ui.Gtk.Label(label="%s / %s (%s)" % (parts[2], parts[1], parts[4]), xalign=1)), False, False, 0)
+    stb.pack_start(cd, False, False, 0)
+
+    # Processes
+    pb = ui.Gtk.Box(orientation=ui.Gtk.Orientation.VERTICAL, spacing=10)
+    cp, gp = ui.card("Top Processes", "Sorted by CPU")
+    for line in (ui.sh("ps -eo comm,pcpu,pmem --sort=-pcpu 2>/dev/null | head -12") or "").splitlines()[1:]:
+        parts = line.split()
+        if len(parts) >= 3:
+            gp.pack_start(ui.row(parts[0], ui.Gtk.Label(label="%s%% cpu  %s%% mem" % (parts[1], parts[2]), xalign=1)), False, False, 0)
+    pb.pack_start(cp, False, False, 0)
+
+    # Updates
+    ub = ui.Gtk.Box(orientation=ui.Gtk.Orientation.VERTICAL, spacing=10)
+    cu, gu = ui.card("System Updates")
+    n = len([l for l in (ui.sh("apt list --upgradable 2>/dev/null") or "").splitlines() if "/" in l])
+    gu.pack_start(ui.row("Available updates", ui.Gtk.Label(label=str(n), xalign=1)), False, False, 0)
+    gu.pack_start(ui.button("Open Software Updater", lambda: ui.sh(
+        "xfce4-terminal -e 'sh -c \"sudo apt update && sudo apt full-upgrade -y; exec sh\"' &", timeout=3),
+        suggested=True), False, False, 0)
+    ub.pack_start(cu, False, False, 0)
+
+    cont, _st = ui.stack([("Overview", ui.scroller(overview)), ("System info", ui.scroller(sysb)),
+                          ("Storage", ui.scroller(stb)), ("Processes", ui.scroller(pb)),
+                          ("Updates", ui.scroller(ub))])
+    box.pack_start(cont, True, True, 0)
+
+    def fill_info():
+        osname = ui.sh("grep -m1 PRETTY_NAME /etc/os-release | cut -d= -f2 | tr -d '\\\"'")
+        info_lbl.set_text("\\n".join([
+            osname or "Himal OS",
+            "Kernel %s" % (ui.sh("uname -r") or "?"),
+            "Uptime %s" % (ui.sh("uptime -p | sed 's/up //'") or "?"),
+            "Desktop Xfce (Himal Edition)",
+            "Build by Samir Puri",
+        ]))
+        return False
+
+    tick()
+    fill_info()
+    ui.GLib.timeout_add(1500, tick)
+    return w
+
+
+if __name__ == "__main__":
+    ui.run_app(build)

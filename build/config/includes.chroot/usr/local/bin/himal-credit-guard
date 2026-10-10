@@ -1,0 +1,42 @@
+#!/bin/sh
+# Restore the Himal OS developer credit if it has been removed or edited.
+# Build by Samir Puri
+MASTER=/usr/share/himal/credit
+TARGETS="$HOME/HIMAL-OS-CREDIT.txt $HOME/HIMAL-OS-CREDIT.md $HOME/.config/himal/CREDIT"
+mkdir -p "$HOME/.config/himal" 2>/dev/null
+
+for f in HIMAL-OS-CREDIT.txt HIMAL-OS-CREDIT.md; do
+    src="$MASTER/$f"
+    dst="$HOME/$f"
+    [ -r "$src" ] || continue
+    if ! cmp -s "$src" "$dst" 2>/dev/null; then
+        cp -f "$src" "$dst" 2>/dev/null || continue
+        chmod 444 "$dst" 2>/dev/null
+        # immutable: blocks deletion and edits even by root until the attribute is cleared
+        chattr +i "$dst" 2>/dev/null
+    fi
+done
+
+# marker
+marker="$HOME/.config/himal/CREDIT"
+if ! grep -q "Samir Puri" "$marker" 2>/dev/null; then
+    printf 'Himal OS\nBuild by Samir Puri\n' > "$marker" 2>/dev/null
+    chmod 444 "$marker" 2>/dev/null
+fi
+
+# desktop icon
+desk="$HOME/Desktop"
+if [ -d "$desk" ]; then
+    icon="$desk/Build by Samir Puri.desktop"
+    if [ ! -f "$icon" ]; then
+        cp -f /usr/share/applications/himal-credit.desktop "$icon" 2>/dev/null
+        chmod 444 "$icon" 2>/dev/null
+        chattr +i "$icon" 2>/dev/null
+    fi
+    chmod +x "$icon" 2>/dev/null
+    if command -v xfconf-query >/dev/null 2>&1; then
+        xfconf-query -c xfce4-desktop -p /desktop-icons/file-icons/show-filesystem -n -t bool -s true 2>/dev/null
+        xfconf-query -c xfce4-desktop -p /desktop-icons/file-icons/show-home -n -t bool -s true 2>/dev/null
+    fi
+fi
+exit 0

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Himal Compositor
+Comment=Rounded corners, shadows and blur
+Exec=picom --config /etc/xdg/picom/picom.conf --daemon
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true

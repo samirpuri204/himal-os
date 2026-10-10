@@ -1,0 +1,89 @@
+#!/usr/bin/env python3
+"""Himal Security Center — Build by Samir Puri"""
+import os
+import sys
+sys.path.insert(0, "/usr/local/lib")
+from himal import ui
+
+PREV = {}
+
+
+def build():
+    w, box = ui.win("Himal Security Center", width=560, height=620)
+
+    def check_firewall():
+        out = ui.sh("ufw status 2>/dev/null | head -1")
+        return ("active" in out.lower()), (out or "ufw not available")
+
+    def check_updates():
+        n = len([l for l in (ui.sh("apt list --upgradable 2>/dev/null") or "").splitlines() if "/" in l])
+        return (n == 0), ("%d updates pending" % n)
+
+    def check_ports():
+        risky = []
+        for line in (ui.sh("ss -tulnH 2>/dev/null") or "").splitlines():
+            for p in (":23 ", ":21 ", ":3306", ":5432", ":27017", ":111 "):
+                if p in line:
+                    risky.append(p.strip())
+        return (not risky), ("%d risky ports open" % len(risky) if risky else "no open risky ports")
+
+    def check_ssh():
+        out = ui.sh("grep -Ei '^\\s*PermitRootLogin\\s+yes' /etc/ssh/sshd_config 2>/dev/null")
+        running = ui.sh_ok("systemctl is-active ssh 2>/dev/null")
+        if out:
+            return False, "root login is permitted"
+        return True, ("ssh active, hardened" if running else "ssh not exposed")
+
+    def check_fail2ban():
+        return ui.sh_ok("systemctl is-active fail2ban 2>/dev/null"), \
+               ("fail2ban running" if ui.sh_ok("systemctl is-active fail2ban 2>/dev/null") else "fail2ban inactive")
+
+    status_card = ui.Gtk.Box(orientation=ui.Gtk.Orientation.VERTICAL, spacing=10)
+
+    def scan(btn=None):
+        for ch in status_card.get_children():
+            status_card.remove(ch)
+        results = [("Firewall", check_firewall()), ("Updates", check_updates()),
+                   ("Ports", check_ports()), ("SSH", check_ssh()), ("Intrusion prevention", check_fail2ban())]
+        bad = sum(1 for _n, (ok, _d) in results if not ok)
+        c, g = ui.card("Security Status")
+        head = ui.Gtk.Label(label=("Your system is secure" if bad == 0 else "%d issue(s) found"), xalign=0)
+        head.get_style_context().add_class("big-value")
+        g.pack_start(head, False, False, 0)
+        sub = ui.Gtk.Label(label="Last checked: %s" % (ui.sh("date '+%d %b %Y, %H:%M'") or ""), xalign=0)
+        sub.get_style_context().add_class("card-sub")
+        g.pack_start(sub, False, False, 0)
+        for name, (ok, desc) in results:
+            mark = "OK" if ok else "CHECK"
+            g.pack_start(ui.row("%s  %s" % (mark, name),
+                                ui.Gtk.Label(label=desc, xalign=1)), False, False, 0)
+        status_card.pack_start(c, False, False, 0)
+        status_card.pack_start(ui.button("Run Full Security Scan", lambda: scan(), suggested=True), False, False, 0)
+        status_card.show_all()
+
+    sb = ui.Gtk.Box(orientation=ui.Gtk.Orientation.VERTICAL, spacing=10)
+    scan()
+    sb.pack_start(status_card, False, False, 0)
+
+    cf, gf = ui.card("Firewall")
+    gf.pack_start(ui.row("Enable firewall", ui.switch(
+        check_firewall()[0], lambda v: ui.sh("pkexec ufw %s 2>/dev/null || true" % ("enable" if v else "disable")))),
+        False, False, 0)
+    for rule in (ui.sh("ufw status numbered 2>/dev/null") or "").splitlines()[1:6]:
+        gf.pack_start(ui.Gtk.Label(label=rule, xalign=0), False, False, 0)
+    sb.pack_start(cf, False, False, 0)
+
+    cl, gl = ui.card("Logs", "Recent authentication events")
+    for line in (ui.sh("journalctl -u ssh -n 8 --no-pager 2>/dev/null || tail -8 /var/log/auth.log 2>/dev/null") or "no log access").splitlines()[:8]:
+        lab = ui.Gtk.Label(label=line[:110], xalign=0)
+        lab.get_style_context().add_class("card-sub")
+        gl.pack_start(lab, False, False, 0)
+    sb.pack_start(cl, False, False, 0)
+    sb.pack_start(ui.credit_line(), False, False, 0)
+
+    box.pack_start(ui.scroller(sb), True, True, 0)
+    return w
+
+
+if __name__ == "__main__":
+    ui.run_app(build)

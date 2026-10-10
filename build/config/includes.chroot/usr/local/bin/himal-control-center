@@ -1,0 +1,102 @@
+#!/usr/bin/env python3
+"""Himal Control Center — Build by Samir Puri"""
+import os
+import sys
+sys.path.insert(0, "/usr/local/lib")
+from himal import ui
+
+
+def build():
+    w, box = ui.win("Himal Control Center", width=440, height=600)
+
+    def wifi_state():
+        return ui.sh("nmcli -t -f WIFI general | head -1") == "enabled"
+
+    def bt_state():
+        return ui.sh("rfkill list bluetooth 2>/dev/null | grep -c 'Soft blocked: no'") != "0"
+
+    def perf_state():
+        p = ui.sh("powerprofilesctl get 2>/dev/null") or "balanced"
+        return {"power-saver": 0, "balanced": 1, "performance": 2}.get(p, 1)
+
+    def dark_state():
+        t = ui.sh("xfconf-query -c xsettings -p /Net/ThemeName 2>/dev/null")
+        return "Darker" in t or "Dark" in t
+
+    # ---- Quick Settings ----
+    quick = ui.Gtk.Box(orientation=ui.Gtk.Orientation.VERTICAL, spacing=10)
+
+    c1, g1 = ui.card("Network")
+    ssid = ui.sh("nmcli -t -f NAME connection show --active 2>/dev/null | head -1") or "not connected"
+    g1.pack_start(ui.row("Wi-Fi", ui.switch(wifi_state(), lambda v: ui.sh(
+        "nmcli radio wifi %s" % ("on" if v else "off"))), ssid), False, False, 0)
+    g1.pack_start(ui.row("Bluetooth", ui.switch(bt_state(), lambda v: ui.sh(
+        "rfkill %s bluetooth" % ("unblock" if v else "block")))), False, False, 0)
+    quick.pack_start(c1, False, False, 0)
+
+    c2, g2 = ui.card("Appearance")
+    g2.pack_start(ui.row("Dark Mode", ui.switch(dark_state(), lambda v: (
+        ui.sh("xfconf-query -c xsettings -p /Net/ThemeName -s %s" % ("Arc-Darker" if v else "Arc")),
+        ui.sh("xfconf-query -c xsettings -p /Net/IconThemeName -s %s" % ("Papirus-Dark" if v else "Papirus"))
+    ))), False, False, 0)
+    g2.pack_start(ui.row("Night Light", ui.switch(
+        ui.sh_ok("pgrep -x gammastep"), lambda v: ui.sh(
+            "(pkill -x gammastep || true); %s" % ("(gammastep -O 3800 >/dev/null 2>&1 &)" if v else "true")
+        )), "Warm screen after dark"), False, False, 0)
+    quick.pack_start(c2, False, False, 0)
+
+    c3, g3 = ui.card("Sound and Display")
+    bright = int(ui.sh("brightnessctl get 2>/dev/null") or "50")
+    g3.pack_start(ui.row("Brightness", ui.slider(bright, 1, 100, lambda v: ui.sh(
+        "brightnessctl set %d%% 2>/dev/null" % int(v)))), False, False, 0)
+    vol = int(ui.sh("pactl get-sink-volume @DEFAULT_SINK@ 2>/dev/null | grep -o '[0-9]*%' | head -1 | tr -d '%'") or "50")
+    g3.pack_start(ui.row("Volume", ui.slider(vol, 0, 150, lambda v: ui.sh(
+        "pactl set-sink-volume @DEFAULT_SINK@ %d%%" % int(v)))), False, False, 0)
+    g3.pack_start(ui.row("Sound Settings", ui.button("Open", lambda: ui.sh(
+        "pavucontrol &", timeout=3), suggested=True)), False, False, 0)
+    quick.pack_start(c3, False, False, 0)
+
+    c4, g4 = ui.card("Power")
+    bat = ui.sh("cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | head -1")
+    g4.pack_start(ui.row("Performance", ui.dropdown(
+        ["Eco", "Balanced", "Performance"], perf_state(), lambda i: ui.sh(
+            "powerprofilesctl set %s 2>/dev/null" % ["power-saver", "balanced", "performance"][i])),
+        ("Battery %s%%" % bat) if bat else "on AC power"), False, False, 0)
+    quick.pack_start(c4, False, False, 0)
+
+    # ---- All Settings ----
+    alls = ui.Gtk.Box(orientation=ui.Gtk.Orientation.VERTICAL, spacing=10)
+    ca, ga = ui.card("Himal Tools")
+    for label, cmd in [
+        ("Personalization Studio", "himal-studio"),
+        ("System Dashboard", "himal-dashboard"),
+        ("Security Center", "himal-security"),
+        ("Performance Mode", "himal-performance"),
+        ("Recovery System", "himal-recovery"),
+        ("Universal App Hub", "himal-apphub"),
+    ]:
+        ga.pack_start(ui.row(label, ui.button("Open", lambda c=cmd: ui.sh("%s &" % c, timeout=3))),
+                      False, False, 0)
+    alls.pack_start(ca, False, False, 0)
+
+    cb, gb = ui.card("System Settings")
+    for label, cmd in [
+        ("Display", "xfce4-display-settings"),
+        ("Keyboard", "xfce4-keyboard-settings"),
+        ("Power Manager", "xfce4-power-manager-settings"),
+        ("Network Connections", "nm-connection-editor"),
+        ("Bluetooth Devices", "blueman-manager"),
+    ]:
+        gb.pack_start(ui.row(label, ui.button("Open", lambda c=cmd: ui.sh("%s &" % c, timeout=3))),
+                      False, False, 0)
+    alls.pack_start(cb, False, False, 0)
+    box.pack_start(ui.credit_line(), False, False, 0)
+
+    container, _st = ui.stack([("Quick Settings", ui.scroller(quick)),
+                               ("All Settings", ui.scroller(alls))])
+    box.pack_start(container, True, True, 0)
+    return w
+
+
+if __name__ == "__main__":
+    ui.run_app(build)

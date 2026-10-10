@@ -1,0 +1,151 @@
+# Himal OS boot splash - Windows-style centred logo with a rotating dot ring.
+# Build by Samir Puri
+
+Window.SetBackgroundTopColor(0.020, 0.039, 0.110);
+Window.SetBackgroundBottomColor(0.031, 0.078, 0.188);
+
+cx = Window.GetWidth() / 2;
+cy = Window.GetHeight() / 2 - 40;
+
+logo_image = Image("logo.png");
+logo_image = logo_image.Scale(150, 150);
+logo_sprite = Sprite(logo_image);
+logo_sprite.SetX(cx - 75);
+logo_sprite.SetY(cy - 105);
+
+title_image = Image.Text("Himal OS", 1, 1, 1, 1);
+title_sprite = Sprite(title_image);
+title_sprite.SetX(cx - title_image.GetWidth() / 2);
+title_sprite.SetY(cy + 62);
+credit_image = Image.Text("Build by Samir Puri", 0.55, 0.75, 0.90, 1);
+credit_sprite = Sprite(credit_image);
+credit_sprite.SetX(cx - credit_image.GetWidth() / 2);
+credit_sprite.SetY(cy + 62 + title_image.GetHeight() + 8);
+
+dot0_image = Image("dot.png");
+dot0_sprite = Sprite(dot0_image);
+dot0_sprite.SetX(cx + 0.0 - 5);
+dot0_sprite.SetY(cy + -46.0 - 5);
+dot0_sprite.SetOpacity(0.25);
+dot1_image = Image("dot.png");
+dot1_sprite = Sprite(dot1_image);
+dot1_sprite.SetX(cx + 32.527 - 5);
+dot1_sprite.SetY(cy + -32.527 - 5);
+dot1_sprite.SetOpacity(0.25);
+dot2_image = Image("dot.png");
+dot2_sprite = Sprite(dot2_image);
+dot2_sprite.SetX(cx + 46.0 - 5);
+dot2_sprite.SetY(cy + -0.0 - 5);
+dot2_sprite.SetOpacity(0.25);
+dot3_image = Image("dot.png");
+dot3_sprite = Sprite(dot3_image);
+dot3_sprite.SetX(cx + 32.527 - 5);
+dot3_sprite.SetY(cy + 32.527 - 5);
+dot3_sprite.SetOpacity(0.25);
+dot4_image = Image("dot.png");
+dot4_sprite = Sprite(dot4_image);
+dot4_sprite.SetX(cx + 0.0 - 5);
+dot4_sprite.SetY(cy + 46.0 - 5);
+dot4_sprite.SetOpacity(0.25);
+dot5_image = Image("dot.png");
+dot5_sprite = Sprite(dot5_image);
+dot5_sprite.SetX(cx + -32.527 - 5);
+dot5_sprite.SetY(cy + 32.527 - 5);
+dot5_sprite.SetOpacity(0.25);
+dot6_image = Image("dot.png");
+dot6_sprite = Sprite(dot6_image);
+dot6_sprite.SetX(cx + -46.0 - 5);
+dot6_sprite.SetY(cy + 0.0 - 5);
+dot6_sprite.SetOpacity(0.25);
+dot7_image = Image("dot.png");
+dot7_sprite = Sprite(dot7_image);
+dot7_sprite.SetX(cx + -32.527 - 5);
+dot7_sprite.SetY(cy + -32.527 - 5);
+dot7_sprite.SetOpacity(0.25);
+
+phase = 0;
+Refresh() {
+    phase = phase + 1;
+    if (phase >= 8) phase = phase - 8;
+    if (phase == 0) {
+        dot0_sprite.SetOpacity(1.000);
+        dot1_sprite.SetOpacity(0.265);
+        dot2_sprite.SetOpacity(0.370);
+        dot3_sprite.SetOpacity(0.475);
+        dot4_sprite.SetOpacity(0.580);
+        dot5_sprite.SetOpacity(0.685);
+        dot6_sprite.SetOpacity(0.790);
+        dot7_sprite.SetOpacity(0.895);
+    }
+    if (phase == 1) {
+        dot0_sprite.SetOpacity(0.895);
+        dot1_sprite.SetOpacity(1.000);
+        dot2_sprite.SetOpacity(0.265);
+        dot3_sprite.SetOpacity(0.370);
+        dot4_sprite.SetOpacity(0.475);
+        dot5_sprite.SetOpacity(0.580);
+        dot6_sprite.SetOpacity(0.685);
+        dot7_sprite.SetOpacity(0.790);
+    }
+    if (phase == 2) {
+        dot0_sprite.SetOpacity(0.790);
+        dot1_sprite.SetOpacity(0.895);
+        dot2_sprite.SetOpacity(1.000);
+        dot3_sprite.SetOpacity(0.265);
+        dot4_sprite.SetOpacity(0.370);
+        dot5_sprite.SetOpacity(0.475);
+        dot6_sprite.SetOpacity(0.580);
+        dot7_sprite.SetOpacity(0.685);
+    }
+    if (phase == 3) {
+        dot0_sprite.SetOpacity(0.685);
+        dot1_sprite.SetOpacity(0.790);
+        dot2_sprite.SetOpacity(0.895);
+        dot3_sprite.SetOpacity(1.000);
+        dot4_sprite.SetOpacity(0.265);
+        dot5_sprite.SetOpacity(0.370);
+        dot6_sprite.SetOpacity(0.475);
+        dot7_sprite.SetOpacity(0.580);
+    }
+    if (phase == 4) {
+        dot0_sprite.SetOpacity(0.580);
+        dot1_sprite.SetOpacity(0.685);
+        dot2_sprite.SetOpacity(0.790);
+        dot3_sprite.SetOpacity(0.895);
+        dot4_sprite.SetOpacity(1.000);
+        dot5_sprite.SetOpacity(0.265);
+        dot6_sprite.SetOpacity(0.370);
+        dot7_sprite.SetOpacity(0.475);
+    }
+    if (phase == 5) {
+        dot0_sprite.SetOpacity(0.475);
+        dot1_sprite.SetOpacity(0.580);
+        dot2_sprite.SetOpacity(0.685);
+        dot3_sprite.SetOpacity(0.790);
+        dot4_sprite.SetOpacity(0.895);
+        dot5_sprite.SetOpacity(1.000);
+        dot6_sprite.SetOpacity(0.265);
+        dot7_sprite.SetOpacity(0.370);
+    }
+    if (phase == 6) {
+        dot0_sprite.SetOpacity(0.370);
+        dot1_sprite.SetOpacity(0.475);
+        dot2_sprite.SetOpacity(0.580);
+        dot3_sprite.SetOpacity(0.685);
+        dot4_sprite.SetOpacity(0.790);
+        dot5_sprite.SetOpacity(0.895);
+        dot6_sprite.SetOpacity(1.000);
+        dot7_sprite.SetOpacity(0.265);
+    }
+    if (phase == 7) {
+        dot0_sprite.SetOpacity(0.265);
+        dot1_sprite.SetOpacity(0.370);
+        dot2_sprite.SetOpacity(0.475);
+        dot3_sprite.SetOpacity(0.580);
+        dot4_sprite.SetOpacity(0.685);
+        dot5_sprite.SetOpacity(0.790);
+        dot6_sprite.SetOpacity(0.895);
+        dot7_sprite.SetOpacity(1.000);
+    }
+}
+Plymouth.SetRefreshFunction(Refresh);

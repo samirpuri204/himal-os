@@ -1,0 +1,28 @@
+# Himal OS — Xfce desktop
+# Credit: Build by Samir Puri
+task-xfce-desktop
+xfce4
+xfce4-goodies
+lightdm
+lightdm-gtk-greeter
+plank
+gnome-keyring
+network-manager-gnome
+pulseaudio
+alsa-utils
+firefox-esr
+chromium
+mousepad
+ristretto
+galculator
+xfce4-whiskermenu-plugin
+xfce4-pulseaudio-plugin
+xfce4-power-manager
+xfce4-power-manager-plugins
+xfce4-screenshooter
+zenity
+gnome-software
+plymouth
+plymouth-themes
+plymouth-label
+yad

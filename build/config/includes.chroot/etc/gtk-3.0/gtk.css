@@ -1,0 +1,69 @@
+/* Himal OS GTK3 overrides - accent, rounding, subtle depth.
+   Loaded on top of the Arc theme. Build by Samir Puri */
+
+@define-color himal_accent #1698D2;
+@define-color himal_accent_dim #1268A8;
+@define-color himal_navy #070E2A;
+
+/* rounded controls */
+button, entry, spinbutton, combobox button {
+    border-radius: 8px;
+    padding: 4px 10px;
+    transition: all 140ms ease-out;
+}
+
+button:hover {
+    background-image: none;
+    background-color: alpha(@himal_accent, 0.16);
+}
+
+button:active,
+button:checked {
+    background-image: none;
+    background-color: @himal_accent;
+    color: #ffffff;
+}
+
+/* the Himal accent on focus instead of Arc's blue */
+entry:focus,
+spinbutton:focus,
+combobox:focus {
+    border-color: @himal_accent;
+    box-shadow: 0 0 0 2px alpha(@himal_accent, 0.35);
+}
+
+/* selection colour */
+*:selected,
+treeview:selected {
+    background-color: @himal_accent;
+    color: #ffffff;
+}
+
+/* menus and popovers: rounded, slightly translucent */
+menu, .menu, popover, .popover {
+    border-radius: 10px;
+    border: 1px solid alpha(@himal_accent, 0.25);
+}
+
+/* notebook tabs */
+notebook > header > tabs > tab:checked {
+    color: @himal_accent;
+    border-bottom: 2px solid @himal_accent;
+}
+
+/* scrollbars: slim */
+scrollbar slider {
+    border-radius: 8px;
+    min-width: 6px;
+    min-height: 6px;
+    background-color: alpha(@himal_accent_dim, 0.55);
+}
+scrollbar slider:hover {
+    background-color: @himal_accent;
+}
+
+/* progress bars in Himal accent */
+progressbar progress {
+    background-color: @himal_accent;
+    border-radius: 6px;
+}

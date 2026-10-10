@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Himal Launcher
+Comment=Application search and power controls
+Exec=himal-launcher
+Icon=himal-logo
+Terminal=false
+Categories=System;Utility;

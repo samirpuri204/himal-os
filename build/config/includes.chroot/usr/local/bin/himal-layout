@@ -1,0 +1,27 @@
+#!/bin/sh
+# Switch the Himal OS desktop between macOS-style and Windows-style layouts.
+#   himal-layout mac      (default) top bar + bottom dock, controls on the left
+#   himal-layout windows  bottom taskbar + Start menu, controls on the right
+set -e
+case "${1:-}" in
+  mac)
+    xfconf-query -c xfce4-panel -p /panels/panel-1/position -s "p=6;x=0;y=0"
+    xfconf-query -c xfce4-panel -p /panels/panel-1/size -s 30
+    xfconf-query -c xfwm4 -p /general/button_layout -s "O|SHMC"
+    [ -f /etc/xdg/autostart/plank.desktop ] && cp /etc/xdg/autostart/plank.desktop "$HOME/.config/autostart/" 2>/dev/null || true
+    (plank >/dev/null 2>&1 &) || true
+    echo "Himal OS: macOS-style layout applied"
+    ;;
+  windows)
+    xfconf-query -c xfce4-panel -p /panels/panel-1/position -s "p=10;x=0;y=0"
+    xfconf-query -c xfce4-panel -p /panels/panel-1/size -s 38
+    xfconf-query -c xfwm4 -p /general/button_layout -s "|HMC"
+    pkill -x plank 2>/dev/null || true
+    echo "Himal OS: Windows-style layout applied"
+    ;;
+  *)
+    echo "usage: himal-layout {mac|windows}" >&2
+    exit 1
+    ;;
+esac
+xfce4-panel -r >/dev/null 2>&1 || true

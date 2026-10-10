@@ -1,0 +1,62 @@
+/* Himal Launcher - rofi theme. Build by Samir Puri */
+configuration {
+    modi: "drun,run,window,filebrowser,ssh,combi";
+    combi-modi: "window,drun,run";
+    show-icons: true;
+    icon-theme: "Papirus-Dark";
+    drun-display-format: "{name}";
+    display-drun: "  Applications";
+    display-run: "  Run";
+    display-window: "  Windows";
+    display-combi: "  Himal Launcher";
+    display-filebrowser: "  Files";
+    display-ssh: "  SSH";
+    font: "Noto Sans 12";
+}
+
+* {
+    bg:      #070E2Aee;
+    bg-alt:  #070E2Acc;
+    fg:      #e8eef7;
+    accent:  #1698D2;
+    urgent:  #e05a6a;
+    background-color: transparent;
+    text-color: @fg;
+    border-color: @accent;
+    spacing: 0;
+}
+
+window {
+    width: 620px;
+    border: 1px solid;
+    border-color: @border-color;
+    border-radius: 14px;
+    background-color: @bg;
+    padding: 14px;
+}
+
+inputbar {
+    background-color: @bg-alt;
+    border-radius: 10px;
+    padding: 10px 14px;
+    children: [ prompt, entry ];
+}
+
+prompt { text-color: @accent; margin: 0 10px 0 0; }
+entry  { placeholder: "Search applications, files and commands..."; placeholder-color: #6b7d92; }
+
+listview { lines: 10; columns: 1; scrollbar: false; margin: 12px 0 0 0; }
+
+element {
+    padding: 8px 10px;
+    border-radius: 8px;
+    spacing: 10px;
+}
+
+element selected {
+    background-color: @accent;
+    text-color: #ffffff;
+}
+
+element-icon { size: 1.35em; }
+element-text { vertical-align: 0.5; }

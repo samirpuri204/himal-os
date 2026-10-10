@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Himal OS Credit
+Comment=Keep the developer credit in place
+Exec=/usr/local/bin/himal-credit-guard
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true

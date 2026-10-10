@@ -1,0 +1,13 @@
+[PlankDockPreferences]
+Alignment=3
+DockItems=exo-file-manager.dockitem;;firefox-esr.dockitem;;chromium.dockitem;;xfce4-terminal.dockitem;;mousepad.dockitem;;org.gnome.Software.dockitem;;himal-control-center.dockitem
+HideMode=1
+IconSize=52
+ItemsAlignment=3
+LockItems=false
+PinnedOnly=false
+Position=3
+Theme=Transparent
+ZoomEnabled=true
+ZoomPercent=170
+Offset=12

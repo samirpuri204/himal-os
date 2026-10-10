@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Himal Personalization Studio
+Comment=Themes, wallpapers, icons and desktop layouts
+Exec=himal-studio
+Icon=preferences-desktop-theme
+Terminal=false
+Categories=System;Settings;X-Himal;
+Keywords=himal;studio;

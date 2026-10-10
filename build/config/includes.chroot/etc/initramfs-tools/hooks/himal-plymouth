@@ -1,0 +1,65 @@
+#!/bin/sh
+# Himal OS - put Plymouth and the Himal theme into the initramfs ourselves.
+#
+# Why this exists: Debian's own plymouth hook begins with
+#
+#     THEME="$(/usr/sbin/plymouth-set-default-theme || true)"
+#     if [ -n "${THEME}" ]; then ... else exit 0; fi
+#
+# so when that command yields nothing at generation time the whole of Plymouth
+# is silently left out of the initramfs. The result is no boot splash at all -
+# plymouthd only starts later from the root filesystem, by which point it can no
+# longer take over the console. That is exactly what the first builds did.
+#
+# This hook copies the pieces unconditionally, so the splash does not depend on
+# the distro hook's guesswork.
+#
+# Build by Samir Puri
+
+PREREQ=""
+prereqs() { echo "$PREREQ"; }
+case "$1" in
+    prereqs) prereqs; exit 0 ;;
+esac
+
+. /usr/share/initramfs-tools/hook-functions
+
+PLUGIN_DIR="/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null || echo aarch64-linux-gnu)/plymouth"
+THEME_SRC="/usr/share/plymouth/themes/himal"
+THEME_DST="${DESTDIR}/usr/share/plymouth/themes/himal"
+
+# 1. the daemon and the client
+[ -x /usr/sbin/plymouthd ] && copy_exec /usr/sbin/plymouthd /sbin
+[ -x /usr/bin/plymouth ]   && copy_exec /usr/bin/plymouth /bin
+
+# 2. the splash plugin our theme uses (ModuleName=script)
+if [ -d "$PLUGIN_DIR" ]; then
+    mkdir -p "${DESTDIR}${PLUGIN_DIR}"
+    cp -a "$PLUGIN_DIR"/. "${DESTDIR}${PLUGIN_DIR}/" 2>/dev/null || true
+fi
+
+# 3. our theme
+if [ -d "$THEME_SRC" ]; then
+    mkdir -p "$THEME_DST"
+    cp -a "$THEME_SRC"/. "$THEME_DST"/ 2>/dev/null || true
+    # make it the theme that is actually loaded
+    mkdir -p "${DESTDIR}/usr/share/plymouth/themes"
+    ln -sf /usr/share/plymouth/themes/himal/himal.plymouth \
+           "${DESTDIR}/usr/share/plymouth/themes/default.plymouth" 2>/dev/null || true
+fi
+
+# 4. the configuration, so plymouthd knows which theme to read
+if [ -f /etc/plymouth/plymouthd.conf ]; then
+    mkdir -p "${DESTDIR}/etc/plymouth"
+    cp -a /etc/plymouth/plymouthd.conf "${DESTDIR}/etc/plymouth/" 2>/dev/null || true
+fi
+
+# 5. fonts, so Image.Text can render the wordmark and the credit
+for f in /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf \
+         /usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf \
+         /usr/share/fonts/truetype/noto/NotoSans-Regular.ttf \
+         /usr/share/fonts/truetype/noto/NotoSans-Bold.ttf; do
+    [ -f "$f" ] && copy_file font "$f"
+done
+
+exit 0

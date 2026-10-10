@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Himal OS
+Description=Himal OS boot splash - Windows-style
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/himal
+ScriptFile=/usr/share/plymouth/themes/himal/himal.script

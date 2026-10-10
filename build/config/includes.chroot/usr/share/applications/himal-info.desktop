@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Himal OS System Info
+Comment=Branded system information
+Exec=xfce4-terminal -e 'sh -c "himal info; exec sh"'
+Icon=himal-logo
+Terminal=false
+Categories=System;Settings;

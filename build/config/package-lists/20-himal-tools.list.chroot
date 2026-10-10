@@ -1,0 +1,70 @@
+# Himal OS — extra capabilities beyond a stock Xfce install
+# Credit: Build by Samir Puri
+
+# --- themes / appearance (open source, no vendor assets) ---
+arc-theme
+papirus-icon-theme
+numix-gtk-theme
+greybird-gtk-theme
+fonts-noto
+fonts-noto-color-emoji
+fonts-dejavu
+
+# --- security toolkit ---
+nmap
+tcpdump
+wireshark
+john
+aircrack-ng
+whois
+bind9-dnsutils
+gnupg
+openssl
+ufw
+fail2ban
+
+# --- development ---
+build-essential
+git
+python3
+python3-pip
+python3-venv
+nodejs
+npm
+cmake
+vim
+nano
+geany
+fd-find
+ripgrep
+jq
+tree
+
+# --- media / codecs ---
+vlc
+ffmpeg
+gstreamer1.0-plugins-good
+gstreamer1.0-plugins-bad
+gstreamer1.0-plugins-ugly
+gstreamer1.0-libav
+
+# --- office / productivity ---
+libreoffice
+libreoffice-gtk3
+evince
+file-roller
+thunderbird
+
+# --- packaging + system ---
+flatpak
+gnome-software-plugin-flatpak
+timeshift
+gparted
+htop
+fastfetch
+unzip
+p7zip-full
+rsync
+curl
+wget
+ca-certificates

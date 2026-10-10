@@ -1,0 +1,29 @@
+#!/bin/sh
+# Himal Launcher - app search, windows, files, and power controls.
+# Build by Samir Puri
+THEME=/etc/xdg/rofi/himal.rasi
+
+case "${1:-}" in
+    "")
+        exec rofi -show combi -theme "$THEME" -combi-modi "window,drun,run"
+        ;;
+    apps)     exec rofi -show drun -theme "$THEME" ;;
+    windows)  exec rofi -show window -theme "$THEME" ;;
+    files)    exec rofi -show filebrowser -theme "$THEME" ;;
+    power)
+        choice=$(printf '%s\n' \
+            "Lock" "Log Out" "Suspend" "Restart" "Shut Down" | \
+            rofi -dmenu -theme "$THEME" -p "Power")
+        case "$choice" in
+            Lock)      xflock4 ;;
+            "Log Out") xfce4-session-logout --logout ;;
+            Suspend)   systemctl suspend ;;
+            Restart)   systemctl reboot ;;
+            "Shut Down") systemctl poweroff ;;
+        esac
+        ;;
+    *)
+        echo "Usage: himal-launcher [apps|windows|files|power]" >&2
+        exit 1
+        ;;
+esac

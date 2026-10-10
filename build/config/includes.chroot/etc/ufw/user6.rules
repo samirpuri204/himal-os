@@ -1,0 +1,8 @@
+*filter
+:ufw6-user-input - [0:0]
+:ufw6-user-output - [0:0]
+:ufw6-user-forward - [0:0]
+-A ufw6-user-input -j DROP
+-A ufw6-user-output -j ACCEPT
+-A ufw6-user-forward -j DROP
+COMMIT

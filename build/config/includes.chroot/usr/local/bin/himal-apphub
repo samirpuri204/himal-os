@@ -1,0 +1,105 @@
+#!/usr/bin/env python3
+"""Himal Universal App Hub — Build by Samir Puri"""
+import os
+import sys
+sys.path.insert(0, "/usr/local/lib")
+from himal import ui
+
+PREV = {}
+
+
+def build():
+    w, box = ui.win("Himal Universal App Hub", width=620, height=620)
+
+    results = ui.Gtk.Box(orientation=ui.Gtk.Orientation.VERTICAL, spacing=6)
+    entry = ui.Gtk.SearchEntry()
+    entry.set_placeholder_text("Search applications...")
+
+    source = ui.dropdown(["All sources", "APT (Debian)", "Flatpak", "AppImage"], 0, lambda i: do_search(entry.get_text(), i))
+
+    def install_apt(pkg):
+        confirm = ui.Gtk.MessageDialog(parent=w, flags=0, type=ui.Gtk.MessageType.QUESTION,
+                                       buttons=ui.Gtk.ButtonsType.OK_CANCEL,
+                                       text="Install %s?" % pkg)
+        confirm.format_secondary_text("Source: Debian APT repository (main/contrib/non-free)")
+        if confirm.run() == ui.Gtk.ResponseType.OK:
+            ui.sh("xfce4-terminal -e 'sh -c \"sudo apt install -y %s; echo; echo Press enter.; read x\"' &" % pkg, timeout=3)
+        confirm.destroy()
+
+    def install_flatpak(appid):
+        confirm = ui.Gtk.MessageDialog(parent=w, flags=0, type=ui.Gtk.MessageType.QUESTION,
+                                       buttons=ui.Gtk.ButtonsType.OK_CANCEL,
+                                       text="Install %s?" % appid)
+        confirm.format_secondary_text("Source: Flathub")
+        if confirm.run() == ui.Gtk.ResponseType.OK:
+            ui.sh("xfce4-terminal -e 'sh -c \"flatpak install -y flathub %s; echo; echo Press enter.; read x\"' &" % appid, timeout=3)
+        confirm.destroy()
+
+    def clear():
+        for ch in results.get_children():
+            results.remove(ch)
+
+    def do_search(query, src=0):
+        clear()
+        if src in (0, 1) and len(query) >= 2:
+            out = ui.sh("apt-cache search --names-only '%s' 2>/dev/null | head -14" % query.replace("'", ""))
+            if out:
+                h = ui.Gtk.Label(label="APT (Debian)", xalign=0)
+                h.get_style_context().add_class("section")
+                results.pack_start(h, False, False, 0)
+            for line in out.splitlines():
+                pkg, _, desc = line.partition(" - ")
+                results.pack_start(ui.row(pkg, ui.button("Install", lambda p=pkg: install_apt(p)), desc[:70]),
+                                   False, False, 0)
+        if src in (0, 2) and len(query) >= 2:
+            out = ui.sh("flatpak search --columns=application,name,description '%s' 2>/dev/null | head -10" % query.replace("'", ""))
+            if out:
+                h = ui.Gtk.Label(label="Flatpak (Flathub)", xalign=0)
+                h.get_style_context().add_class("section")
+                results.pack_start(h, False, False, 0)
+            for line in out.splitlines():
+                cols = line.split("\t")
+                if len(cols) >= 2:
+                    results.pack_start(ui.row(cols[1], ui.button("Install", lambda a=cols[0]: install_flatpak(a)),
+                                              cols[2][:70] if len(cols) > 2 else ""), False, False, 0)
+        if src == 3:
+            h = ui.Gtk.Label(label="AppImage", xalign=0)
+            h.get_style_context().add_class("section")
+            results.pack_start(h, False, False, 0)
+            found = ui.sh("ls ~/Applications/*.AppImage ~/.local/bin/*.AppImage 2>/dev/null | head -10")
+            for f in (found or "").splitlines():
+                results.pack_start(ui.row(os.path.basename(f), ui.button("Make executable", lambda p=f: ui.sh(
+                    "chmod +x '%s'" % p))), False, False, 0)
+            if not found:
+                lab = ui.Gtk.Label(label="No AppImages found. Drop them in ~/Applications.", xalign=0)
+                lab.get_style_context().add_class("card-sub")
+                results.pack_start(lab, False, False, 0)
+        if not results.get_children():
+            lab = ui.Gtk.Label(label="Type at least two characters, or open another source tab.", xalign=0)
+            lab.get_style_context().add_class("card-sub")
+            results.pack_start(lab, False, False, 0)
+        results.show_all()
+
+    entry.connect("activate", lambda e: do_search(e.get_text(), source.get_active()))
+
+    top = ui.Gtk.Box(orientation=ui.Gtk.Orientation.HORIZONTAL, spacing=8)
+    top.pack_start(entry, True, True, 0)
+    top.pack_start(source, False, False, 0)
+    box.pack_start(top, False, False, 0)
+
+    c, g = ui.card("Discover", "APT packages and Flatpak apps, with their source shown before install")
+    g.pack_start(ui.scroller(results), True, True, 0)
+    c.set_size_request(-1, 380)
+    box.pack_start(c, True, True, 0)
+
+    for line in (ui.sh("flatpak remotes 2>/dev/null") or "no flatpak remotes").splitlines()[:2]:
+        lab = ui.Gtk.Label(label="remote: %s" % line, xalign=0)
+        lab.get_style_context().add_class("card-sub")
+        box.pack_start(lab, False, False, 0)
+    box.pack_start(ui.credit_line(), False, False, 0)
+    do_search("", 0)
+    return w
+
+
+if __name__ == "__main__":
+    ui.run_app(build)

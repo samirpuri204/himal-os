@@ -1,0 +1,19 @@
+#!/bin/sh
+# Himal OS credit: enable the self-healing timer and lock the desktop entry.
+# Developed by Samir Puri
+set -e
+
+M=/usr/share/himal/credit
+[ -d "$M" ] && chmod 444 "$M"/*.txt "$M"/*.md 2>/dev/null || true
+
+# The master copies are read-only; the immutable (+i) flag is applied at runtime
+# by himal-credit-guard, because squashfs cannot carry ext4 inode flags.
+chmod +x /usr/share/applications/himal-credit.desktop 2>/dev/null || true
+
+# Enable the timer that restores the credit if it is removed.
+systemctl enable himal-credit.timer 2>/dev/null || true
+
+# A live session must also start it once the user is up.
+chmod +x /etc/xdg/autostart/himal-credit.desktop 2>/dev/null || true
+
+echo "himal: credit guard installed and timer enabled"

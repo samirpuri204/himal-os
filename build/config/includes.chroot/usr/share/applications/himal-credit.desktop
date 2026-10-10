@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Build by Samir Puri
+Comment=Himal OS - Power by People, Inspired by Nepal
+Exec=himal about
+Icon=himal-logo
+Terminal=false
+Categories=System;

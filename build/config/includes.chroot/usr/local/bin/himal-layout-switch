@@ -1,0 +1,9 @@
+#!/bin/sh
+# Minimal chooser so the layout can be switched without a terminal.
+choice=$(printf 'macOS-style layout\nWindows-style layout\n' | \
+  zenity --list --title="Himal OS Layout" --text="Choose a desktop layout" \
+         --column="Layout" --height=220 --width=320 2>/dev/null) || exit 0
+case "$choice" in
+  "macOS-style layout")   exec himal-layout mac ;;
+  "Windows-style layout") exec himal-layout windows ;;
+esac

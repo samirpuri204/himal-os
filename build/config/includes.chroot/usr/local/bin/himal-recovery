@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+"""Himal Recovery System — Build by Samir Puri"""
+import os
+import sys
+sys.path.insert(0, "/usr/local/lib")
+from himal import ui
+
+PREV = {}
+
+
+def build():
+    w, box = ui.win("Himal Recovery System", width=580, height=600)
+
+    def confirm(msg, action):
+        d = ui.Gtk.MessageDialog(parent=w, flags=0, type=ui.Gtk.MessageType.WARNING,
+                                 buttons=ui.Gtk.ButtonsType.OK_CANCEL, text=msg)
+        d.format_secondary_text("This will make changes to your system. Continue?")
+        if d.run() == ui.Gtk.ResponseType.OK:
+            action()
+        d.destroy()
+
+    # Snapshots
+    snap = ui.Gtk.Box(orientation=ui.Gtk.Orientation.VERTICAL, spacing=10)
+    cs, gs = ui.card("System Snapshots", "Provided by Timeshift")
+    gs.pack_start(ui.button("Create a Snapshot", lambda: confirm(
+        "Create a system snapshot now?",
+        lambda: ui.sh("pkexec timeshift --create --comments 'Himal OS manual snapshot' 2>/dev/null || true", timeout=300)),
+        suggested=True), False, False, 0)
+    listing = ui.Gtk.Box(orientation=ui.Gtk.Orientation.VERTICAL, spacing=6)
+    for line in (ui.sh("timeshift --list 2>/dev/null | grep -E '^[0-9]' | head -10") or "").splitlines():
+        parts = line.split()
+        if len(parts) >= 3:
+            listing.pack_start(ui.row(parts[1] if len(parts) > 1 else line[:20],
+                                      ui.button("Restore", lambda: confirm(
+                                          "Restore this snapshot? Files changed since it was taken will be reverted.",
+                                          lambda: ui.sh("pkexec timeshift --restore --snapshot '%s' --yes 2>/dev/null || true"
+                                                        % parts[1], timeout=900)))),
+                               False, False, 0)
+    if not listing.get_children():
+        lab = ui.Gtk.Label(label="No snapshots yet. Create one before your next update.", xalign=0)
+        lab.get_style_context().add_class("card-sub")
+        listing.pack_start(lab, False, False, 0)
+    gs.pack_start(listing, False, False, 0)
+    snap.pack_start(cs, False, False, 0)
+
+    # Guided repair
+    rep = ui.Gtk.Box(orientation=ui.Gtk.Orientation.VERTICAL, spacing=10)
+    cr, gr = ui.card("Guided Repair", "Safe, reversible fixes for common breakage")
+    fixes = [
+        ("Broken updates", "Finish interrupted package operations",
+         "sudo dpkg --configure -a && sudo apt -f install -y"),
+        ("Package errors", "Repair a damaged package database",
+         "sudo apt --fix-broken install -y && sudo apt clean"),
+        ("Networking problems", "Restart the network stack",
+         "sudo systemctl restart NetworkManager"),
+        ("Display configuration", "Reset the desktop and display settings",
+         "xfconf-query -c xfwm4 -p /general/theme -s Arc-Darker"),
+        ("Desktop panels", "Restore the default Himal panels",
+         "himal-layout mac"),
+    ]
+    for title, desc, cmd in fixes:
+        gr.pack_start(ui.row(title, ui.button("Repair", lambda c=cmd, t=title: confirm(
+            "Run repair: %s?" % t,
+            lambda: ui.sh("xfce4-terminal -e 'sh -c \"%s; echo; echo Done. Press enter.; read x\"' &" % cmd, timeout=3))),
+            desc), False, False, 0)
+    rep.pack_start(cr, False, False, 0)
+
+    cl, gl = ui.card("Live Rescue")
+    gl.pack_start(ui.row("System log", ui.button("Open", lambda: ui.sh("xfce4-terminal -e 'sh -c \"journalctl -b -p err; exec sh\"' &", timeout=3))), False, False, 0)
+    gl.pack_start(ui.row("Disk health", ui.button("Open", lambda: ui.sh("xfce4-terminal -e 'sh -c \"sudo smartctl -a /dev/sda 2>/dev/null || lsblk; exec sh\"' &", timeout=3))), False, False, 0)
+    rep.pack_start(cl, False, False, 0)
+    rep.pack_start(ui.credit_line(), False, False, 0)
+
+    cont, _st = ui.stack([("Snapshots", ui.scroller(snap)), ("Repair", ui.scroller(rep))])
+    box.pack_start(cont, True, True, 0)
+    return w
+
+
+if __name__ == "__main__":
+    ui.run_app(build)

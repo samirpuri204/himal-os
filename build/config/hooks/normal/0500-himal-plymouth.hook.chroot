@@ -1,0 +1,18 @@
+#!/bin/sh
+# Select the Himal OS Plymouth splash and bake it into the initramfs.
+#
+# live-build copies config/includes.chroot AFTER packages are installed, so the
+# initramfs that the kernel package generated does not contain our theme. This
+# hook runs later and regenerates it.
+set -e
+
+if [ -f /usr/share/plymouth/themes/himal/himal.plymouth ]; then
+    update-alternatives --install \
+        /usr/share/plymouth/themes/default.plymouth default.plymouth \
+        /usr/share/plymouth/themes/himal/himal.plymouth 200 2>/dev/null || true
+    update-alternatives --set default.plymouth \
+        /usr/share/plymouth/themes/himal/himal.plymouth 2>/dev/null || true
+    echo "himal: plymouth theme selected"
+fi
+
+update-initramfs -u -k all 2>/dev/null || true

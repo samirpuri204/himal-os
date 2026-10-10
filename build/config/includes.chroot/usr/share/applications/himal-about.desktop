@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=About Himal OS
+Comment=Version, base and developer credit
+Exec=himal about
+Icon=himal-logo
+Terminal=false
+Categories=System;Settings;

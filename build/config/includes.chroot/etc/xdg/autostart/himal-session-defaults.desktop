@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Himal OS Session Defaults
+Comment=Apply the Himal OS appearance and layout at login
+Exec=/usr/local/bin/himal-session-defaults
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Delay=3

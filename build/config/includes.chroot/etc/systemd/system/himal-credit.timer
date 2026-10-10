@@ -1,0 +1,10 @@
+[Unit]
+Description=Keep the Himal OS developer credit in place
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=5min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

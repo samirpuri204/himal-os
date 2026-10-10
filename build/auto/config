@@ -1,0 +1,28 @@
+#!/bin/sh
+# live-build configuration — Himal OS
+# Base : Debian 13 "trixie", arm64, Xfce
+# Credit: Build by Samir Puri
+set -e
+
+lb config noauto \
+    --architectures arm64 \
+    --distribution trixie \
+    --parent-distribution trixie \
+    --binary-images iso-hybrid \
+    --debian-installer none \
+    --archive-areas "main contrib non-free non-free-firmware" \
+    --firmware-chroot true \
+    --iso-application "Himal OS" \
+    --iso-publisher "Himal OS Project" \
+    --iso-volume "HIMAL_OS" \
+    --bootappend-live "boot=live components username=himal hostname=himal locales=en_US.UTF-8 keyboard-layouts=us quiet splash" \
+    --bootloader grub-efi \
+    --memtest none \
+    --apt-indices false \
+    --linux-flavours arm64 \
+    --mirror-bootstrap "http://deb.debian.org/debian/" \
+    --mirror-chroot "http://deb.debian.org/debian/" \
+    --mirror-chroot-security "http://security.debian.org/debian-security/" \
+    --mirror-binary "http://deb.debian.org/debian/" \
+    --mirror-binary-security "http://security.debian.org/debian-security/" \
+    "${@}"

@@ -1,0 +1,7 @@
+[Unit]
+Description=Restore the Himal OS developer credit
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/himal-credit-guard

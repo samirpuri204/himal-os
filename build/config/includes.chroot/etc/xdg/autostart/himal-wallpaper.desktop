@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Himal OS Wallpaper
+Comment=Apply the Himal OS desktop background
+Exec=/usr/local/bin/himal-set-wallpaper
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true

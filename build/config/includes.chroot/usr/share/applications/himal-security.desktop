@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Himal Security Center
+Comment=Firewall, updates, open ports and hardening
+Exec=himal-security
+Icon=security-high
+Terminal=false
+Categories=System;Settings;X-Himal;
+Keywords=himal;security;

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Himal Recovery System
+Comment=Snapshots, repair and rollback
+Exec=himal-recovery
+Icon=drive-harddisk
+Terminal=false
+Categories=System;Settings;X-Himal;
+Keywords=himal;recovery;

@@ -1,0 +1,35 @@
+#!/bin/sh
+# Himal OS system layer: timezone, locales, firewall, automatic updates.
+# Build by Samir Puri
+set -e
+
+# Nepal timezone by default
+if [ -f /usr/share/zoneinfo/Asia/Kathmandu ]; then
+    ln -sf /usr/share/zoneinfo/Asia/Kathmandu /etc/localtime
+    echo "Asia/Kathmandu" > /etc/timezone
+    echo "himal: timezone set to Asia/Kathmandu"
+fi
+
+# generate locales (en_US plus Nepali)
+if command -v locale-gen >/dev/null 2>&1; then
+    locale-gen en_US.UTF-8 ne_NP 2>/dev/null || locale-gen 2>/dev/null || true
+fi
+
+# enable the firewall at boot rather than waiting for first login
+if command -v ufw >/dev/null 2>&1; then
+    ufw --force enable >/dev/null 2>&1 || true
+fi
+
+# automatic security updates
+systemctl enable unattended-upgrades 2>/dev/null || true
+systemctl enable apt-daily.timer apt-daily-upgrade.timer 2>/dev/null || true
+
+# trim and index new executables so the menu picks up the Himal tools
+if command -v update-desktop-database >/dev/null 2>&1; then
+    update-desktop-database -q /usr/share/applications 2>/dev/null || true
+fi
+if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+    gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor 2>/dev/null || true
+fi
+
+echo "himal: system layer applied"

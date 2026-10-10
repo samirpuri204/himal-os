@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+"""Himal Performance Mode — Build by Samir Puri"""
+import os
+import sys
+sys.path.insert(0, "/usr/local/lib")
+from himal import ui
+
+
+def build():
+    w, box = ui.win("Himal Performance Mode", width=520, height=560)
+
+    current = ui.sh("powerprofilesctl get 2>/dev/null") or "balanced"
+    modes = [
+        ("Eco", "power-saver", "Save power for longer battery life"),
+        ("Balanced", "balanced", "Best balance for daily use"),
+        ("Performance", "performance", "Maximum performance for heavy tasks"),
+    ]
+
+    c, g = ui.card("Performance Profile", "Applied through power-profiles-daemon — real hardware tuning")
+    rowbox = ui.Gtk.Box(orientation=ui.Gtk.Orientation.HORIZONTAL, spacing=10)
+    for label, key, desc in modes:
+        b = ui.Gtk.Button(label=label)
+        b.set_size_request(140, 84)
+        if key == current:
+            b.get_style_context().add_class("suggested-action")
+        b.set_tooltip_text(desc)
+        b.connect("clicked", lambda _w, k=key, l=label: (
+            ui.sh("powerprofilesctl set %s 2>/dev/null" % k),
+            ui.sh("notify-send 'Himal OS' 'Performance set to %s'" % l)))
+        rowbox.pack_start(b, True, True, 0)
+    g.pack_start(rowbox, False, False, 0)
+    box.pack_start(c, False, False, 0)
+
+    c2, g2 = ui.card("Hardware Tuning")
+    gov = ui.sh("cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null") or "n/a"
+    g2.pack_start(ui.row("CPU Performance Scaling",
+                         ui.dropdown(["Power Save", "Balanced", "Performance"],
+                                     {"powersave": 0, "schedutil": 1, "performance": 2}.get(gov, 1),
+                                     lambda i: ui.sh("cpupower frequency-set -g %s 2>/dev/null || true"
+                                                     % ["powersave", "schedutil", "performance"][i])),
+                         gov), False, False, 0)
+    g2.pack_start(ui.row("Power Management", ui.switch(
+        ui.sh_ok("systemctl is-enabled power-profiles-daemon 2>/dev/null"),
+        lambda v: ui.sh("systemctl %s power-profiles-daemon 2>/dev/null || true"
+                        % ("enable" if v else "disable")))), False, False, 0)
+    g2.pack_start(ui.row("Auto Suspend", ui.switch(
+        "1" in ui.sh("xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/inactivity-on-ac 2>/dev/null | tail -1"),
+        lambda v: ui.sh("xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/inactivity-on-ac "
+                        "-n -t uint -s %d 2>/dev/null || true" % (14 if v else 0)))),
+        False, False, 0)
+    g2.pack_start(ui.row("Disk Optimization", ui.button("Run fstrim", lambda: ui.sh(
+        "pkexec fstrim -av 2>/dev/null || true")), "Trim unmapped blocks on SSDs"), False, False, 0)
+    box.pack_start(c2, False, False, 0)
+
+    box.pack_start(ui.credit_line(), False, False, 0)
+    return w
+
+
+if __name__ == "__main__":
+    ui.run_app(build)

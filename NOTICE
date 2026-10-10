@@ -1,0 +1,35 @@
+Himal OS
+=======
+
+Build by Samir Puri.
+
+SPDX-License-Identifier: GPL-2.0-or-later
+
+Himal OS is a derivative work of Debian GNU/Linux 13 (trixie), which is
+free software distributed under the GNU General Public License. The full
+license text is in LICENSE.
+
+Attribution
+-----------
+* Debian GNU/Linux - Copyright (C) Software in the Public Interest, Inc.
+  and the Debian Project. Debian's copyright notices are preserved in every
+  file that carries one.
+* "Debian" is a trademark of Software in the Public Interest, Inc.
+  Himal OS is not affiliated with, sponsored by, or endorsed by the
+  Debian Project.
+* Work derived from ReactOS in an earlier phase of this project is licensed
+  GPLv2+; those notices remain intact where applicable.
+
+The Himal OS specific additions - the desktop components, configuration
+tools, branding and build tooling - are
+
+    Copyright (C) 2026 Samir Puri
+
+and are released under the same terms as the GPL, version 2 or later.
+
+Corresponding source
+--------------------
+Everything needed to rebuild the image is in this repository: the live-build
+configuration under build/, and the generators that produce the overlay under
+tools/. Publishing a built image therefore satisfies the GPL requirement to
+make the corresponding source available.

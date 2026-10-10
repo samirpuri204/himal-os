@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Himal Performance Mode
+Comment=Eco, Balanced and Performance profiles
+Exec=himal-performance
+Icon=power-profile-balanced
+Terminal=false
+Categories=System;Settings;X-Himal;
+Keywords=himal;performance;

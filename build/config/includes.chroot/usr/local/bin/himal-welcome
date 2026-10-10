@@ -1,0 +1,35 @@
+#!/bin/sh
+# Shown once, on first login. Build by Samir Puri
+FLAG=$HOME/.config/himal/welcomed
+[ -f "$FLAG" ] && exit 0
+mkdir -p "$(dirname "$FLAG")" 2>/dev/null
+
+TEXT="<big><b>Welcome to Himal OS</b></big>
+
+<i>Build by Samir Puri</i>
+
+Your system is ready. A few things worth knowing:
+
+  <b>himal</b> - open a terminal and run it. System info, layouts,
+  wallpapers, light/dark - all in one command.
+
+  <b>Two layouts, switched live.</b> The default is the macOS-style
+  top bar with a dock. Prefer Windows? Run:
+
+        himal layout windows
+
+  <b>First-run tip:</b> run <b>himal features</b> to see everything
+  that makes this system different."
+
+if command -v yad >/dev/null 2>&1; then
+    yad --title="Welcome to Himal OS" \
+        --image=/usr/share/pixmaps/himal-logo-128.png \
+        --image-on-top --width=640 --height=580 \
+        --button="Show me:1" --button="Close:0" \
+        --text="$TEXT"
+    [ $? -eq 1 ] && command -v xfce4-terminal >/dev/null 2>&1 && \
+        xfce4-terminal -e "sh -c 'himal features; exec sh'" &
+elif command -v zenity >/dev/null 2>&1; then
+    zenity --info --title="Welcome to Himal OS" --width=480 --text="$TEXT" 2>/dev/null
+fi
+touch "$FLAG"

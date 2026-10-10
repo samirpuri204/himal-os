@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Plank
+Comment=Himal OS dock
+Exec=plank
+Icon=plank
+Terminal=false
+Categories=Utility;
+X-GNOME-Autostart-enabled=true

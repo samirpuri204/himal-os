@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Himal System Dashboard
+Comment=CPU, memory, storage, network and updates
+Exec=himal-dashboard
+Icon=utilities-system-monitor
+Terminal=false
+Categories=System;Settings;X-Himal;
+Keywords=himal;dashboard;

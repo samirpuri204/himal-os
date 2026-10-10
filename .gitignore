@@ -1,0 +1,19 @@
+# build artefacts - never commit these
+*.iso
+*.img
+*.squashfs
+dist/
+binary/
+chroot/
+tmp-initrd/
+boottest/
+splashtest/
+desktoptest*/
+
+# python
+__pycache__/
+*.pyc
+
+# scratch
+*.log
+.build*
