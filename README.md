@@ -20,6 +20,41 @@
 
 ---
 
+## Download
+
+The ready-to-boot image is published as a GitHub Release.
+
+**[Download Himal OS 13 →](https://github.com/samirpuri204/himal-os/releases/tag/v13.0.0)**
+
+GitHub rejects release assets of 2 GiB or larger, so the 2.68 GiB image is split
+into three parts. Download all three, then reassemble and verify:
+
+```bash
+cat Himal-OS-13-arm64-xfce.iso.part1of3 \
+    Himal-OS-13-arm64-xfce.iso.part2of3 \
+    Himal-OS-13-arm64-xfce.iso.part3of3 > Himal-OS-13-arm64-xfce.iso
+
+shasum -a 256 Himal-OS-13-arm64-xfce.iso
+# expected 0f2b52e98fd99c801e1c8b98792f4671da338f5d02362a7369a034278ccebbbe
+```
+
+| | |
+|---|---|
+| Release | [v13.0.0](https://github.com/samirpuri204/himal-os/releases/tag/v13.0.0) |
+| Parts | 3 × 958,830,592 bytes |
+| Reassembled size | 2,876,491,776 bytes (2.68 GiB) |
+| SHA-256 | `0f2b52e98fd99c801e1c8b98792f4671da338f5d02362a7369a034278ccebbbe` |
+| Architecture | arm64 (aarch64), UEFI |
+
+The release also carries `SHA256SUMS.txt`, so you can verify the individual
+parts with `shasum -a 256 -c SHA256SUMS.txt` before reassembling.
+
+> **arm64 only.** This image runs on Apple Silicon and other arm64 machines. It
+> will not run on x86 hardware or in an x86 virtual machine — an ARM CPU cannot
+> execute x86 code, and the image contains no x86 binaries.
+
+---
+
 ## Screenshots
 
 Real captures from the built ISO, taken headlessly under QEMU with UEFI firmware:
